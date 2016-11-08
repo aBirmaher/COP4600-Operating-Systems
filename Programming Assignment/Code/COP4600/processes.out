@@ -1,0 +1,10 @@
+4 processes
+Using Shortest Job First (Pre)
+
+Time 0: Idle
+Time 1: P1 arrived
+Time 1: P2 arrived
+Time 2: P3 arrived
+Time 3: P4 arrived
+Finished at time 30
+

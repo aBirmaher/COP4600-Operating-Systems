@@ -1,0 +1,218 @@
+//Alan Birmaher
+//COP4600
+//Programming Assignment
+//4/16/15
+
+//Libraries
+import java.util.*;
+import java.io.*;
+
+//processScheduler Class
+public class processScheduler {
+
+	//main Function
+	public static void main (String agrs[]) throws IOException{
+		
+		//Variable Instantiation
+		int processNum, runTime, flag, quantum=0, i;
+		String temp, schType;
+		
+		//Set up arrayLists for holding process information
+		ArrayList <String> name= new ArrayList <String>();
+		ArrayList <Integer> arrival= new ArrayList <Integer>();
+		ArrayList <Integer> burst= new ArrayList <Integer>();
+		ArrayList <Integer> startTime= new ArrayList <Integer>();
+		ArrayList <Integer> endTime= new ArrayList <Integer>();
+		ArrayList <Integer> waitTime= new ArrayList <Integer>();
+		
+		//File reader setup
+		Scanner in = new Scanner(new File("processes.in"));
+		
+		//Create output file and writer setup
+		File fileOut = new File("processes.out");
+		FileOutputStream is = new FileOutputStream(fileOut);
+        OutputStreamWriter osw = new OutputStreamWriter(is);    
+        Writer out = new BufferedWriter(osw);
+		
+		//Read in number of processes
+		temp= in.next();
+		processNum= in.nextInt();
+		if(in.next().charAt(0)=='#'){
+			temp= in.nextLine();
+		}
+		
+		//Read in number of time units
+		temp= in.next();
+		runTime= in.nextInt();
+		if(in.next().charAt(0)=='#'){
+			temp= in.nextLine();
+		}
+		
+		//Read in scheduling type
+		temp= in.next();
+		schType= in.next();
+		if(in.next().charAt(0)=='#'){
+			temp= in.nextLine();
+		}
+		
+		//Check if quantum is provided or commented
+		flag= 0;
+		temp= in.next();
+		
+		//Check if the whole line is commented
+		if(temp.charAt(0)=='#'){
+			temp= in.nextLine();
+			flag= 1;
+		}
+		
+		//If quantum is needed, read in
+		if(flag== 0){
+			
+			quantum= in.nextInt();
+			if(in.next().charAt(0)=='#'){
+				temp= in.nextLine();
+				flag= 1;
+			}
+			
+		}
+		
+		//Read in processes in question
+		for(i=0; i<processNum; i++){
+			
+			temp= in.next()+in.next();
+			name.add(in.next());
+			temp= in.next();
+			arrival.add(in.nextInt());
+			temp= in.next();
+			burst.add(in.nextInt());
+			
+		}
+		
+		//If schedule type is first come first served
+		if(schType.equals("fcfs")){
+			
+			//Print header
+			out.write(processNum + " processes\n");
+			out.write("Using First Come First Served\n\n");
+			
+			//Variables
+			int flagInWork= -1;
+			int burstRem= 0;
+			int flagIdle=0;
+			String currentName = "no";
+			
+			//Setup queue
+			ArrayList <Integer> queue= new ArrayList <Integer>();
+			
+			//Loop runs amount of times of time units
+			for(i=0; i<runTime; i++){
+
+				//Add processes to queue
+				for(int j=0; j<processNum;j++){
+					
+					//If process is arriving
+					if(arrival.get(j)==i){
+					
+						//Add it to arrival queue
+						queue.add(j);
+						
+						//Print out message of arrival
+						out.write("Time " + i + ": " + name.get(j) + " arrived\n");
+					
+					}
+					
+				}
+				
+				//If we are mid burst skip this
+				if(burstRem==0){
+					
+					if (!currentName.equals("no")){
+						
+						out.write("Time " + i + ": " + currentName + " finished\n");
+					}
+				
+					//If there is something waiting in queue to be next
+					if(!queue.isEmpty()){
+						
+						//Reset Idle flag
+						flagIdle=0;
+						
+						//Save value of value in to flagInWork
+						flagInWork= queue.get(0);
+						
+						//Load burst length of active
+						burstRem= burst.get(flagInWork);
+						
+						//Store currentName value for use
+						currentName= name.get(queue.get(0));
+						
+						//Print message
+						out.write("Time " + i + ": " + currentName + " selected (burst " + burstRem-- + ")\n");
+						
+						//Removes newly used node
+						queue.remove(0);
+						
+					}
+					
+					//If we are idle
+					else if (flagIdle!=1) {
+						
+						//Print idle message, only first time we become idle
+						out.write ("Time " + i + ": Idle\n");
+						
+						//Flag if idle
+						flagIdle=1;
+						
+					}
+					
+				}
+				
+				//If burstRem is not zero
+				else if(burstRem>0)
+					burstRem--;
+				
+				if (burstRem==0 && i==runTime-1){
+					
+					out.write("Time " + i++ + ": " + currentName + " finished\n");
+				}
+				
+			}
+			
+			//Print final statement
+			out.write("Finished at time " + i + "\n\n");
+			
+		}
+		
+		//If schedule type is shortest job first
+		else if(schType.equals("sjf")){
+			
+			out.write(processNum + " processes\n");
+			out.write("Using Shortest Job First (Pre)\n\n");
+			
+		}
+		
+		//If schedule type is round robin
+		else if(schType.equals("rr")){
+			
+			out.write(processNum + " processes\n");
+			out.write("Using Round-Robin\n");
+			out.write("Quantum " + quantum + "\n\n");
+			
+		}
+		
+		//If input was wrong
+		else{
+			
+			System.out.println("Incorrect scheduling type, try again!");
+			//System.exit(0);
+			//return;
+			
+		}
+		
+		//Close input and output file
+		in.close();
+		out.close();
+		
+	}
+	
+}
